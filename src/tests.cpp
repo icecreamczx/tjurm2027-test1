@@ -7,7 +7,11 @@ int my_strlen(char *str) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int j=0;
+    for(int i = 0; str[i]!='\0'; i++){
+        j++;
+    }
+    return j;
 }
 
 
@@ -19,6 +23,16 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    int i = 0;
+    for(; str_1[i]!='\0'; i++){}
+    int k=i;
+    for(int l=0;str_2[l] != '\0';k++,l++){
+        str_1[k]=str_2[l];
+    }
+    str_1[k]='\0';
+
+
+    
 }
 
 
@@ -31,7 +45,26 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int length=0,length_p=0;
+    char *k= nullptr;
+    for(int i = 0; s[i]!='\0'; i++){
+        length++;
+    }
+    for(int i = 0; p[i]!='\0'; i++){
+        length_p++;
+    }
+    for(int i=0;i<=length-1;i++){
+        if(s[i]==p[0]){
+            for(int j=0;p[j] != '\0' && s[i+j] == p[j];j++){
+                if(j==length_p-1){
+                    k=&s[i];
+                    return k;
+                }
+                
+            }
+        }
+    }
+    return k;
 }
 
 
@@ -74,7 +107,7 @@ char* my_strstr(char *s, char *p) {
  */
 
 
-// 练习4，将彩色图片(rgb)转化为灰度图片
+// 练习4，将彩色图片(rgb)转化为灰度图片 
 void rgb2gray(float *in, float *out, int h, int w) {
     /**
      * 编写这个函数，将一张彩色图片转化为灰度图片。以下是各个参数的含义：
@@ -93,10 +126,23 @@ void rgb2gray(float *in, float *out, int h, int w) {
      * 考点：
      * (1) for循环的使用。
      * (2) 内存的访问。
-     */
+     */ 
 
     // IMPLEMENT YOUR CODE HERE
     // ...
+    for (int i =0; i<h; i++){
+        for (int j=0; j<w;j++){
+            //(i,j),这是第i*w+j+1个像素（第一个为1）即i*w+j（第一个为0）
+            //那么这个像素下标为    int idx= = (i*w+j)*3
+            int idx =(i*w+j)*3;
+            float R = in[idx];
+            float G = in[idx+1];
+            float B = in [idx+2];
+            float gray = 0.1140 * B  + 0.5870 * G + 0.2989 * R;
+            out[i*w+j] = gray;
+        }
+    }
+
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
@@ -157,14 +203,14 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
      *                     x2 - x1         x2 - x1
      *
      *                    y2 - y          y - y1
-     *          Q = Q1 * ———————— + Q2 * ————————
+     *          P = Q1 * ———————— + Q2 * ————————
      *                    y2 - y1         y2 - y1
      *
      *      2.3 化简：
      *          记 Dx = x2 - x1, Dy = y2 - y1, dx = x - x1, dy = y - y1，
      *
      *                     (Dx - dx)(Dy - dy)         dx(Dy - dy)
-     *          Q = P1 * ———————————————————— + P2 * ————————————— +
+     *          P = P1 * ———————————————————— + P2 * ————————————— +
      *                          Dx * Dy                 Dx * Dy
      *
      *                    (Dx - dx)dy           dxdy
@@ -197,13 +243,45 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
      */
 
     int new_h = h * scale, new_w = w * scale;
-    // IMPLEMENT YOUR CODE HERE
+    //void resize(float *in, float *out, int h, int w, int c, float scale)
+    for (int x =0; x<new_h; x++){
+        for (int y=0; y<new_w;y++){
+            //(x,y),这是第i*w+j+1个像素（第一个为1）即x*w+y（第一个为0）
+            //那么这个像素下标为    int idx= (x*w+y)*3
+            float x_0=x/scale,y_0=y/scale;
+            int x_1 = static_cast<int>(x_0),y_1 = static_cast<int>(y_0);//左上角的邻居点
+            int x_2 = x_1 + 1,y_2 = y_1;
+            int x_3 = x_1,y_3 = y_1 + 1;
+            int x_4 = x_1 + 1,y_4 = y_1 + 1;
+            if (x_2 >= h) x_2 = h - 1;
+            if (y_2 >= w) y_2 = w - 1; 
+            if (x_4 >= h) x_4 = h - 1;
+            if (y_4 >= w) y_4 = w - 1;
+            if (y_3 >= w) y_3 = w - 1;
+            int idx =(x*w+y)*3;
+            float dx = x_0 - x_1, dy = y_0 - y_1;
+            
+            
+            for (int k = 0; k < c; k++) {
+            float v = in[(x_1*w + y_1)*c + k] * (1-dx)*(1-dy)
+                      + in[(x_2*w + y_2)*c + k] * dx*(1-dy)
+                      + in[(x_3*w + y_3)*c + k] * (1-dx)*dy
+                      + in[(x_4*w + y_4)*c + k] * dx*dy;
+            out[(x*new_w + y)*c + k] = v;
+            }
+            //Q = P1 * (1 - dx)(1 - dy) + P2 * dx(1 - dy)+ P3 * (1 - dx)dy + P4 * dxdy
+
+
+            
+        }
+    }
+
 
 }
 
 
 // 练习6，实现图像处理算法：直方图均衡化
-void hist_eq(float *in, int h, int w) {
+void hist_eq(float *in,int h, int w) {
     /**
      * 将输入图片进行直方图均衡化处理。参数含义：
      * (1) float *in: 输入的灰度图片。
@@ -221,4 +299,28 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    int gray[256]={0};
+    for(int g=0;g<256;g++){
+        for(int i=0;i<h*w;i++){
+            if(g==in[i]){
+                gray[g]++;
+            }
+        }
+    }
+    int N = h*w;
+    float frequency[256]={0};
+    for(int i=0;i<256;i++){
+        frequency[i] = (float)gray[i] / N;
+    }
+    for(int i=1;i<256;i++){
+        frequency[i]=frequency[i-1]+frequency[i];
+    }
+    int gray_new[256];
+    for(int i=0;i<256;i++){
+        gray_new[i] = (int)(frequency[i] * 255 + 0.5f);
+    }
+    for(int i=0;i<h*w;i++){
+        in[i]=gray_new[(int)(in[i])];
+    }
+    
 }
